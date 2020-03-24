@@ -49,6 +49,11 @@ sce$clusters <- factor(igraph::cluster_louvain(g)$membership)
 # Visualization.
 scater::plotUMAP(sce, colour_by = "clusters")
 
+p <- scater::plotUMAP(sce, colour_by = "clusters")
+plotly::ggplotly(p)
 
 ## Notes
+
+# Might be better to subset the sce object before running the plotly code
+
 
