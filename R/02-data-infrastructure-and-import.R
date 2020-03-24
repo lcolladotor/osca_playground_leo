@@ -78,6 +78,11 @@ pryr::object_size(sce)
 
 # E.g., subset data to just wild type cells
 # Remember, cells are columns of the SCE
+x <- sce$phenotype == "wild type phenotype"
+class(x)
+table(x)
+table(sce$phenotype)
+
 sce[, sce$phenotype == "wild type phenotype"]
 
 # Access the feature metadata from our SCE
@@ -100,11 +105,14 @@ ah <- AnnotationHub()
 query(ah, c("Mus musculus", "Ensembl", "v97"))
 
 # Annotate each gene with its chromosome location
+#download_data <- function(ah, id) { access_data(sh, id) }
 ensdb <- ah[["AH73905"]]
 chromosome <- mapIds(ensdb,
     keys = rownames(sce),
     keytype = "GENEID",
     column = "SEQNAME")
+
+class(chromosome)
 rowData(sce)$chromosome <- chromosome
 
 # Access the feature metadata from our updated SCE
@@ -115,6 +123,12 @@ pryr::object_size(sce)
 
 # E.g., subset data to just genes on chromosome 3
 # NOTE: which() needed to cope with NA chromosome names
+x <- rowData(sce)$chromosome
+table(is.na(x))
+y <- x == '3'
+table(is.na(y))
+table(is.na(which(y)))
+head(which(y))
 sce[which(rowData(sce)$chromosome == "3"), ]
 
 # Access the metadata from our SCE
