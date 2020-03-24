@@ -206,6 +206,40 @@ head(sizeFactors(sce))
 sizeFactors(sce) <- scater::librarySizeFactors(sce)
 head(sizeFactors(sce))
 
+## Which function defines the sce class?
+## SingleCellExperiment::SingleCellExperiment
+
+## What are the minimum type of tables an sce object contains?
+## info genes: rowData()
+## number of reads overlapping each gene for each cell: assays
+## info about cells: colData()
+## optionally: PCA, TSNE (reducedDims), alternative experiments (altExp),
+## random info (metadata)
+
+## Where are the colnames(sce) used?
+head(colnames(sce))
+## column names of the assays + rownames of the colData
+# identical(colnames(assays(sce, 'counts')), rownames(colData(sce))) ## colnames(assays(sce, 'counts')) is NULL in this example =(
+identical(rownames(reducedDim(sce, 'PCA')), rownames(colData(sce)))
+
+## Similarly, where are the rownames(sce) used?
+head(rownames(sce))
+## rownames(assays(sce, 'counts'))
+head(rownames(rowData(sce)))
+
+## How many principal components did we compute?
+reducedDimNames(sce)
+dim(reducedDim(sce, 'TSNE'))
+dim(reducedDim(sce, 'PCA'))
+dim(sce)
+head(reducedDim(sce, 'PCA'))
+## 50
+
+## Which three chromosomes have the highest mean gene expression?
+rowData(sce)
+sort(with(rowData(sce), tapply(mean, chromosome, base::mean)), decreasing = TRUE)
+sort(tapply(rowData(sce)$mean, rowData(sce)$chromosome, base::mean),
+    decreasing = TRUE)
 
 ## ----ercc_exercise, cache = TRUE, dependson='all_code'---------------------------------------------------------------
 ## Read the data from the web
