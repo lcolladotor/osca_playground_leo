@@ -302,22 +302,28 @@ abline(0, 1, lty = 2, col = 'red')
 
 
 ## ----ercc_solution_plots, cache = TRUE, dependson='ercc_exercise'----------------------------------------------------
+
+xlimits <- log2(c(min(counts(altExp(
+    sce, "ERCC"
+))), max(counts(altExp(
+    sce, "ERCC"
+)))) + 1)
+
 for (i in seq_len(2)) {
     plot(
         log2(10 * ercc_info[, "concentration in Mix 1 (attomoles/ul)"] + 1) ~
             log2(counts(altExp(sce, "ERCC"))[, i] +
                     1),
-        xlab = "log norm counts",
+        xlab = "log2 counts + 1",
         ylab = "Mix 1: log2(10 * Concentration + 1)",
         main = colnames(altExp(sce, "ERCC"))[i],
-        xlim = log2(c(min(counts(
-            altExp(sce, "ERCC")
-        )), max(counts(
-            altExp(sce, "ERCC")
-        ))) + 1)
+        xlim = xlimits
     )
     abline(0, 1, lty = 2, col = 'red')
 }
+
+
+
 
 pdf('ERCC_example.pdf')
 for (i in seq_len(ncol(sce))) {
@@ -326,17 +332,48 @@ for (i in seq_len(ncol(sce))) {
         log2(10 * ercc_info[, "concentration in Mix 1 (attomoles/ul)"] + 1) ~
             log2(counts(altExp(sce, "ERCC"))[, i] +
                     1),
-        xlab = "log norm counts",
+        xlab = "log2 counts + 1",
         ylab = "Mix 1: log2(10 * Concentration + 1)",
         main = colnames(altExp(sce, "ERCC"))[i],
-        xlim = log2(c(min(counts(
-            altExp(sce, "ERCC")
-        )), max(counts(
-            altExp(sce, "ERCC")
-        ))) + 1)
+        xlim = xlimits
     )
     abline(0, 1, lty = 2, col = 'red')
 }
+dev.off()
+
+## ggplot2 version
+library('ggplot2')
+library('cowplot')
+
+plot_list <- lapply(seq_len(ncol(sce)), function(i) {
+    message(paste(Sys.time(), 'plotting cell', i))
+    df <- data.frame(
+        x = log2(counts(altExp(sce, "ERCC"))[, i] +
+                1),
+        y = log2(10 * ercc_info[, "concentration in Mix 1 (attomoles/ul)"] + 1),
+        stringsAsFactors = FALSE
+    )
+    ggplot(df, aes(x = x, y = y)) + geom_point() +
+        xlab("log2 counts + 1") +
+        ylab("Mix 1: log2(10 * Concentration + 1)") +
+        xlim(xlimits) +
+        geom_abline(
+            slope = 1,
+            intercept = 0,
+            linetype = 2,
+            color = 'red'
+        ) +
+        ggtitle(colnames(sce)[i]) +
+        theme_bw(base_size = 12)
+})
+pdf(
+    'ERCC_example_ggplot2_version.pdf',
+    useDingbats = FALSE,
+    width = 10 * 5,
+    height = 20 * 5
+)
+cowplot::plot_grid(plotlist = plot_list,
+    ncol = 10)
 dev.off()
 
 
