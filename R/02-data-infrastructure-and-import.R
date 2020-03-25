@@ -246,17 +246,59 @@ sort(tapply(rowData(sce)$mean, rowData(sce)$chromosome, base::mean),
 ercc_info <-
     read.delim(
         'https://tools.thermofisher.com/content/sfs/manuals/cms_095046.txt',
-        as.is = TRUE,
+        # as.is = TRUE,
         row.names = 2,
-        check.names = FALSE
+        check.names = FALSE,
+        stringsAsFactors = FALSE
     )
+dim(ercc_info)
+dim(sce) # 192 cells
+dim(altExp(sce, "ERCC")) # 92 ERCC sequences for our 192 cells
+
+head(rownames(ercc_info))
+head(rownames(altExp(sce, "ERCC"))) ## use as reference
 
 ## Match the ERCC data
 m <- match(rownames(altExp(sce, "ERCC")), rownames(ercc_info))
+
+## Check that it worked
+table(is.na(m)) ## all should be FALSE
+stopifnot(all(!is.na(m)))
+if(!all(!is.na(m))) {
+    stop("Hay al menos un NA!")
+}
+
+## Align the table from the web
 ercc_info <- ercc_info[m, ]
 
+## Check that it all worked
+stopifnot(identical(rownames(altExp(sce, "ERCC")), rownames(ercc_info)))
+
 ## Normalize the ERCC counts
-altExp(sce, "ERCC") <- scater::logNormCounts(altExp(sce, "ERCC"))
+#altExp(sce, "ERCC") <- scater::logNormCounts(altExp(sce, "ERCC"))
+
+i <- 1
+plot(ercc_info[, "concentration in Mix 1 (attomoles/ul)"]  ~
+        counts(altExp(sce, "ERCC"))[, i]
+)
+
+
+plot(ercc_info[, "concentration in Mix 1 (attomoles/ul)"]  ~
+        counts(altExp(sce, "ERCC"))[, i],
+    xlab = 'Observed ERCC',
+    ylab = 'Expected ERCC'
+)
+
+
+plot(log(ercc_info[, "concentration in Mix 1 (attomoles/ul)"])  ~
+        log(counts(altExp(sce, "ERCC"))[, i]),
+    xlab = 'Observed ERCC',
+    ylab = 'Expected ERCC'
+)
+
+
+
+abline(0, 1, lty = 2, col = 'red')
 
 
 ## ----ercc_solution_plots, cache = TRUE, dependson='ercc_exercise'----------------------------------------------------
@@ -268,14 +310,34 @@ for (i in seq_len(2)) {
         xlab = "log norm counts",
         ylab = "Mix 1: log2(10 * Concentration + 1)",
         main = colnames(altExp(sce, "ERCC"))[i],
-        xlim = c(min(logcounts(
+        xlim = log2(c(min(counts(
             altExp(sce, "ERCC")
-        )), max(logcounts(
+        )), max(counts(
             altExp(sce, "ERCC")
-        )))
+        ))) + 1)
     )
     abline(0, 1, lty = 2, col = 'red')
 }
+
+pdf('ERCC_example.pdf')
+for (i in seq_len(ncol(sce))) {
+    message(paste(Sys.time(), 'plotting cell', i))
+    plot(
+        log2(10 * ercc_info[, "concentration in Mix 1 (attomoles/ul)"] + 1) ~
+            log2(counts(altExp(sce, "ERCC"))[, i] +
+                    1),
+        xlab = "log norm counts",
+        ylab = "Mix 1: log2(10 * Concentration + 1)",
+        main = colnames(altExp(sce, "ERCC"))[i],
+        xlim = log2(c(min(counts(
+            altExp(sce, "ERCC")
+        )), max(counts(
+            altExp(sce, "ERCC")
+        ))) + 1)
+    )
+    abline(0, 1, lty = 2, col = 'red')
+}
+dev.off()
 
 
 ## ----all_code_part2, cache=TRUE--------------------------------------------------------------------------------------
