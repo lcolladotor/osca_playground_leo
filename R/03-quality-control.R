@@ -315,6 +315,44 @@ plot(
 abline(h = attr(discard.mito, "thresholds")["higher"], col = "red")
 
 
+## Exercise answers
+
+### Why does emptyDrops() return NA values?
+
+## Below lower & test.ambient = FALSE
+## 0 "total" (even with test.ambient = TRUE)
+with(all.out, table(
+    'NA pvalue' = is.na(PValue),
+    'Total is 0?' = Total == 0
+))
+
+### Are the p-values the same for e.out and all.out?
+## Answers from the group: Yes: 4, No: 6
+identical(e.out$PValue, all.out$PValue)
+
+## What if you subset to the non-NA entries?
+identical(
+    e.out$PValue[!is.na(all.out$FDR)],
+    all.out$PValue[!is.na(all.out$FDR)]
+)
+## false
+identical(
+    e.out$PValue[!is.na(e.out$FDR)],
+    all.out$PValue[!is.na(e.out$FDR)]
+)
+## true
+with(e.out, table(
+    'NA pvalue' = is.na(PValue),
+    'Total is <= 100' = Total <= 100
+))
+
+## We talked about the importance of setting the random seed
+## using set.seed() before running any function that has
+## a random component. Otherwise your results will not be
+## reproducible and you'll never know if they didn't
+## reproduce because of the random seed or because some
+## other code changed in the function you are running.
+
 ## ----marking, cache=TRUE, dependson='use_case'-----------------------------------------------------------------------
 # Removing low-quality cells
 # Keeping the columns we DON'T want to discard
