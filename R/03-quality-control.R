@@ -158,6 +158,14 @@ sce.grun <- addPerCellQC(sce.grun)
 
 plotColData(sce.grun, x = "donor", y = "altexps_ERCC_percent")
 
+hist(sce.grun$altexps_ERCC_percent[sce.grun$donor == 'D10'],
+    breaks = 100,
+    col = 'light blue')
+
+hist(sce.grun$altexps_ERCC_percent[sce.grun$donor == 'D2'],
+    breaks = 100,
+    col = 'light blue')
+
 discard.ercc <- isOutlier(sce.grun$altexps_ERCC_percent,
     type = "higher",
     batch = sce.grun$donor)
@@ -167,6 +175,27 @@ discard.ercc2 <- isOutlier(
     batch = sce.grun$donor,
     subset = sce.grun$donor %in% c("D17", "D2", "D7")
 )
+
+## Understanding %in%
+class(sce.grun$donor)
+length(sce.grun$donor)
+dim(sce.grun)
+table(sce.grun$donor)
+
+manual_subset <- sce.grun$donor == 'D17' | sce.grun$donor == 'D2' | sce.grun$donor == 'D7'
+class(manual_subset)
+length(manual_subset)
+sum(manual_subset)
+480 + 96 + 384
+
+## quicker
+# x %in% y
+x <- c('a', 'b', 'c', 'ch')
+y <- letters
+x %in% y
+x[x %in% y]
+auto_subset <- sce.grun$donor %in% c('D17', 'D2', 'D7')
+identical(manual_subset, auto_subset)
 
 plotColData(
     sce.grun,
