@@ -19,11 +19,23 @@ sce.zeisel <- sce.zeisel[, !qc$discard]
 ## ----all_code2, cache=TRUE, dependson='all_code'---------------------------------------------------------------------
 # Library size factors
 lib.sf.zeisel <- librarySizeFactors(sce.zeisel)
+class(lib.sf.zeisel)
+length(lib.sf.zeisel)
+head(lib.sf.zeisel)
+mean(lib.sf.zeisel)
 
 # Examine distribution of size factors
 summary(lib.sf.zeisel)
 hist(log10(lib.sf.zeisel), xlab = "Log10[Size factor]", col = "grey80")
+
+class(counts(sce.zeisel))
+dim(counts(sce.zeisel))
+?colSums
+
 ls.zeisel <- colSums(counts(sce.zeisel))
+class(ls.zeisel)
+length(ls.zeisel)
+
 plot(
     ls.zeisel,
     lib.sf.zeisel,
@@ -34,11 +46,28 @@ plot(
 
 
 ## ----exercise_solution, cache=TRUE, dependson='all_code'-------------------------------------------------------------
+
+## No, they are not identical
+identical(ls.zeisel, lib.sf.zeisel)
+all(ls.zeisel == lib.sf.zeisel) # Brenda
+
+## Are they proportional?
+# a * b = c ## Find b
+# a * b / a = c / a
+# a / a * b = c / a
+# 1 * b = c / a
+# b = c / a
+table(lib.sf.zeisel / ls.zeisel)
+# length(unique(lib.sf.zeisel / ls.zeisel)) ## numerical discrepancies
+table(ls.zeisel / lib.sf.zeisel)
+
+
 ## First compute the sums
 zeisel_sums <- colSums(counts(sce.zeisel))
 identical(zeisel_sums, ls.zeisel)
 
 ## Next, make them have unity mean
+mean(zeisel_sums)
 zeisel_size_factors <- zeisel_sums/mean(zeisel_sums)
 identical(zeisel_size_factors, lib.sf.zeisel)
 
