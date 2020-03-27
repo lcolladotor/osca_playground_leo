@@ -83,6 +83,10 @@ clust.zeisel <- quickCluster(sce.zeisel)
 deconv.sf.zeisel <-
     calculateSumFactors(sce.zeisel, clusters = clust.zeisel, min.mean = 0.1)
 
+table(clust.zeisel)
+class(deconv.sf.zeisel)
+length(deconv.sf.zeisel)
+
 # Examine distribution of size factors
 summary(deconv.sf.zeisel)
 hist(log10(deconv.sf.zeisel), xlab = "Log10[Size factor]",
@@ -95,6 +99,28 @@ plot(
     ylab = "Size factor"
 )
 
+## Solutions
+
+### How many quick clusters did we get?
+## Answer: 12
+class(clust.zeisel)
+summary(clust.zeisel) ## Isaac
+table(clust.zeisel)
+
+### How many cells per quick cluster did we get?
+## Answer: from 113 to 325
+sort(table(clust.zeisel))
+summary(as.vector(table(clust.zeisel)))
+
+### How many quick clusters will we get if we set the minimum size to 200? Use 100 as the seed.
+## Answer: 10
+set.seed(100)
+sort(table(quickCluster(sce.zeisel, min.size = 200)))
+## Remember to set the seed before running any function
+## that has a random component.
+
+### How many lines do you see?
+## Answer: More than one, but I don't know how many
 
 ## ----all_code4, cache=TRUE, dependson='all_code3'--------------------------------------------------------------------
 # Library size factors vs. convolution size factors
@@ -111,6 +137,10 @@ plot(
 )
 abline(a = 0, b = 1, col = "red")
 
+
+###
+sce.zeisel <- logNormCounts(sce.zeisel)
+assayNames(sce.zeisel)
 
 ## ----'reproducibility', cache = TRUE, dependson=knitr::all_labels()--------------------------------------------------
 options(width = 120)
